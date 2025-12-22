@@ -21,10 +21,6 @@ class UserModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'username': username,
-      'weight': weight,
-      'height': height,
-    };
+    return {'username': username, 'weight': weight, 'height': height};
   }
 }
