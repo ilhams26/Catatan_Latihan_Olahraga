@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/exercise.dart';
 import '../providers/exercise_provider.dart';
+import '../providers/auth_provider.dart'; // Import Auth
 
 class FormScreen extends StatefulWidget {
   const FormScreen({super.key});
@@ -68,8 +69,24 @@ class _FormScreenState extends State<FormScreen> {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      // AMBIL USER YANG SEDANG LOGIN
+                      final user = Provider.of<AuthProvider>(
+                        context,
+                        listen: false,
+                      ).currentUser;
+
+                      if (user == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Error: User tidak ditemukan"),
+                          ),
+                        );
+                        return;
+                      }
+
                       final newExercise = Exercise(
                         id: '',
+                        userId: user.id, // <--- MASUKKAN ID DISINI
                         activityName: _activityController.text,
                         duration: int.parse(_durationController.text),
                         calories: int.parse(_caloriesController.text),
@@ -82,12 +99,16 @@ class _FormScreenState extends State<FormScreen> {
                         listen: false,
                       ).addExercise(newExercise);
 
-                      // 2. TAMBAHAN PENTING: Cek mounted
+                      // 2. Cek mounted
                       if (!mounted) return;
 
                       // 3. Tutup layar jika sukses
                       if (success) {
                         Navigator.pop(context);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Gagal menyimpan data")),
+                        );
                       }
                     }
                   },

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/exercise_provider.dart';
 import '../providers/auth_provider.dart';
 import 'form_screen.dart';
+import 'profile_screen.dart'; // Import ProfileScreen
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,9 +15,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // PENTING: Ambil data berdasarkan User ID yang login
     Future.microtask(() {
-      if (mounted) {
-        Provider.of<ExerciseProvider>(context, listen: false).getAllExercises();
+      final user = Provider.of<AuthProvider>(
+        context,
+        listen: false,
+      ).currentUser;
+      if (user != null && mounted) {
+        Provider.of<ExerciseProvider>(
+          context,
+          listen: false,
+        ).getMyExercises(user.id);
       }
     });
   }
@@ -37,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      // HAPUS backgroundColor manual disini agar mengikuti Tema
       body: Consumer<ExerciseProvider>(
         builder: (context, provider, child) {
           int totalCal = 0;
@@ -55,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView(
               padding: const EdgeInsets.all(24),
               children: [
-                // HEADER
+                // HEADER (Dengan Navigasi Profil)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -76,10 +84,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-                    const CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Colors.blueAccent,
-                      child: Icon(Icons.person, color: Colors.white),
+                    // TOMBOL PROFIL (Bisa Di-klik)
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ProfileScreen(),
+                          ),
+                        );
+                      },
+                      child: const CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.blueAccent,
+                        child: Icon(Icons.person, color: Colors.white),
+                      ),
                     ),
                   ],
                 ),
@@ -135,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 // TARGET CARD
                 Card(
                   elevation: 0,
-                  color: isDark ? Colors.grey[800] : Colors.white, // Adaptif
+                  color: isDark ? Colors.grey[800] : Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                     side: BorderSide(
@@ -186,58 +205,68 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                ...provider.exercises
-                    .map(
-                      (item) => Card(
-                        elevation: 0,
-                        color: isDark ? Colors.grey[800] : Colors.white,
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          side: BorderSide(
-                            color: isDark
-                                ? Colors.transparent
-                                : Colors.grey[100]!,
+                if (provider.isLoading)
+                  const Center(child: CircularProgressIndicator())
+                else if (provider.exercises.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Center(child: Text("Belum ada data latihan.")),
+                  )
+                else
+                  ...provider.exercises
+                      .map(
+                        (item) => Card(
+                          elevation: 0,
+                          color: isDark ? Colors.grey[800] : Colors.white,
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: BorderSide(
+                              color: isDark
+                                  ? Colors.transparent
+                                  : Colors.grey[100]!,
+                            ),
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            leading: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.orange[50],
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.directions_run,
+                                color: Colors.orange,
+                              ),
+                            ),
+                            title: Text(
+                              item.activityName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Text(
+                              item.date,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            trailing: Text(
+                              "+${item.calories} Kkal",
+                              style: const TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          leading: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.orange[50],
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.directions_run,
-                              color: Colors.orange,
-                            ),
-                          ),
-                          title: Text(
-                            item.activityName,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                            item.date,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          trailing: Text(
-                            "+${item.calories} Kkal",
-                            style: const TextStyle(
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
+                      )
+                      .toList(),
                 const SizedBox(height: 80),
               ],
             ),

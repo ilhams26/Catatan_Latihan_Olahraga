@@ -3,13 +3,15 @@ import '../models/exercise.dart';
 import '../models/user_model.dart';
 
 class ApiService {
+  // Pastikan URL MockAPI kamu benar (tanpa '/workouts' di ujungnya)
   final String baseUrl = 'https://6948320d1ee66d04a44eed4d.mockapi.io/api/v1';
   final Dio _dio = Dio();
 
-  // --- EXERCISE ---
-  Future<List<Exercise>> getExercises() async {
+  // 1. GET Workouts SPESIFIK USER (Agar data tidak campur)
+  Future<List<Exercise>> getExercisesByUser(String userId) async {
     try {
-      final response = await _dio.get('$baseUrl/workouts');
+      // MockAPI support filter: /workouts?userId=123
+      final response = await _dio.get('$baseUrl/workouts?userId=$userId');
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data
@@ -24,6 +26,35 @@ class ApiService {
     }
   }
 
+  // 2. GET SEMUA WORKOUTS (Untuk hitung Leaderboard)
+  Future<List<Exercise>> getAllWorkoutsGlobal() async {
+    try {
+      final response = await _dio.get('$baseUrl/workouts');
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data;
+        return data.map((item) => Exercise.fromJson(item)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // 3. GET SEMUA USERS (Untuk nama di Leaderboard)
+  Future<List<UserModel>> getAllUsers() async {
+    try {
+      final response = await _dio.get('$baseUrl/users');
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data;
+        return data.map((item) => UserModel.fromJson(item)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // 4. POST (Tambah Data dengan UserID)
   Future<bool> addExercise(Exercise exercise) async {
     try {
       final response = await _dio.post(
@@ -35,7 +66,7 @@ class ApiService {
       return false;
     }
   }
-  // --- USER (BARU) ---
+
   Future<UserModel?> getUserByUsername(String username) async {
     try {
       final response = await _dio.get('$baseUrl/users?username=$username');
