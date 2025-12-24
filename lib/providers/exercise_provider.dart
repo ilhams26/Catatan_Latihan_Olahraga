@@ -6,8 +6,8 @@ import '../services/api_service.dart';
 class ExerciseProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
 
-  List<Exercise> _exercises = []; // List latihan milik user yang login
-  List<Map<String, dynamic>> _leaderboardData = []; // Data Ranking
+  List<Exercise> _exercises = []; // Data milik user yang login
+  List<Map<String, dynamic>> _leaderboardData = []; // Data Ranking Global
 
   bool _isLoading = false;
 
@@ -19,11 +19,10 @@ class ExerciseProvider with ChangeNotifier {
   Future<void> getMyExercises(String userId) async {
     _isLoading = true;
     notifyListeners();
-
     try {
       _exercises = await _apiService.getExercisesByUser(userId);
     } catch (e) {
-      debugPrint("Error fetching exercises: $e");
+      debugPrint("Error: $e");
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -34,10 +33,8 @@ class ExerciseProvider with ChangeNotifier {
   Future<bool> addExercise(Exercise exercise) async {
     _isLoading = true;
     notifyListeners();
-
     bool success = await _apiService.addExercise(exercise);
     if (success) {
-      // Refresh hanya data milik user ini
       await getMyExercises(exercise.userId);
     } else {
       _isLoading = false;
@@ -52,12 +49,11 @@ class ExerciseProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      // A. Ambil semua User & semua Latihan dari database (Global)
+      // Ambil semua data global
       List<UserModel> allUsers = await _apiService.getAllUsers();
       List<Exercise> allWorkouts = await _apiService.getAllWorkoutsGlobal();
 
-      // B. Hitung total kalori per User ID
-      // Map: { "id_user_A": 500, "id_user_B": 1200 }
+      // Hitung total kalori per User ID
       Map<String, int> calorieMap = {};
 
       for (var workout in allWorkouts) {
@@ -68,21 +64,25 @@ class ExerciseProvider with ChangeNotifier {
             calorieMap[workout.userId]! + workout.calories;
       }
 
-      // C. Gabungkan User Info dengan Total Kalori
+      // Gabungkan User Info dengan Total Kalori
       List<Map<String, dynamic>> results = [];
       for (var user in allUsers) {
-        int total = calorieMap[user.id] ?? 0; // Jika tidak ada latihan, 0
-
-        // Masukkan ke list hasil
+        int total = calorieMap[user.id] ?? 0;
         results.add({
           'name': user.username,
           'calories': total,
           'isMe': user.id == currentUserId, // Tandai diri sendiri
+          'rank': 0, // Nanti diisi setelah sort
         });
       }
 
-      // D. Urutkan dari terbesar ke terkecil
+      // Urutkan dari terbesar
       results.sort((a, b) => b['calories'].compareTo(a['calories']));
+
+      // Isi Ranking
+      for (int i = 0; i < results.length; i++) {
+        results[i]['rank'] = i + 1;
+      }
 
       _leaderboardData = results;
     } catch (e) {

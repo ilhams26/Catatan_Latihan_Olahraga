@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/exercise_provider.dart';
 import 'providers/theme_provider.dart';
-import 'screens/login_screen.dart';
+import 'screens/onboarding_screen.dart'; 
 import 'screens/main_screen.dart';
 import 'theme/app_theme.dart';
 
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(
-            title: 'Exercise Tracker',
+            title: 'FitJournal',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
@@ -37,7 +37,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
   @override
@@ -59,7 +58,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
     return Consumer<AuthProvider>(
       builder: (context, auth, child) {
         if (auth.isLoggedIn) return const MainScreen();
-        return const LoginScreen();
+        // Jika belum login, tampilkan Onboarding dulu
+        return const OnboardingScreen();
       },
     );
   }

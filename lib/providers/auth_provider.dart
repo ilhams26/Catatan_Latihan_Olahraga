@@ -7,37 +7,29 @@ class AuthProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
 
   bool _isLoggedIn = false;
-  UserModel? _currentUser; // Menyimpan data user lengkap (ID, BB, TB)
-  int _weeklyTarget = 1000; // Default target kalori
+  UserModel? _currentUser;
+  int _weeklyTarget = 1000;
 
   bool get isLoggedIn => _isLoggedIn;
   UserModel? get currentUser => _currentUser;
   int get weeklyTarget => _weeklyTarget;
+  String get username => _currentUser?.username ?? '';
 
-  get username => null;
-
-  // Cek Status Login & Ambil Data Terbaru dari API
   Future<void> checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
     _isLoggedIn = prefs.getBool('is_login') ?? false;
-    String username = prefs.getString('username') ?? '';
+    String savedUsername = prefs.getString('username') ?? '';
     _weeklyTarget = prefs.getInt('weekly_target') ?? 1000;
 
-    if (_isLoggedIn && username.isNotEmpty) {
-      // Sinkronisasi data dari Server
-      _currentUser = await _apiService.getUserByUsername(username);
+    if (_isLoggedIn && savedUsername.isNotEmpty) {
+      _currentUser = await _apiService.getUserByUsername(savedUsername);
     }
     notifyListeners();
   }
 
-  // Login: Jika user belum ada di API, otomatis dibuatkan
   Future<void> login(String username) async {
     final prefs = await SharedPreferences.getInstance();
-
-    // 1. Cek apakah user ada di API?
     UserModel? user = await _apiService.getUserByUsername(username);
-
-    // 2. Jika tidak ada, buat baru
     user ??= await _apiService.createUser(username);
 
     if (user != null) {
@@ -51,7 +43,6 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> updateBodyData(int weight, int height) async {
     if (_currentUser != null) {
-      // Update object lokal
       final updatedUser = UserModel(
         id: _currentUser!.id,
         username: _currentUser!.username,
@@ -59,13 +50,40 @@ class AuthProvider with ChangeNotifier {
         height: height,
       );
 
-      // Kirim ke API
       bool success = await _apiService.updateUser(updatedUser);
       if (success) {
         _currentUser = updatedUser;
         notifyListeners();
       }
     }
+  }
+
+  //UPDATE USERNAME ---
+  Future<bool> updateUsername(String newName) async {
+    if (_currentUser != null) {
+      final updatedUser = UserModel(
+        id: _currentUser!.id,
+        username: newName, // Nama baru
+        weight: _currentUser!.weight,
+        height: _currentUser!.height,
+      );
+
+      // 1. Update ke Server
+      bool success = await _apiService.updateUser(updatedUser);
+
+      if (success) {
+        // 2. Update Lokal (Provider)
+        _currentUser = updatedUser;
+
+        // 3. Update Shared Preferences agar login tetap jalan
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('username', newName);
+
+        notifyListeners();
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<void> setWeeklyTarget(int target) async {

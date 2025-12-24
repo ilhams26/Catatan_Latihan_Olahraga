@@ -16,18 +16,28 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.fitness_center, size: 80, color: Colors.blue),
-              const SizedBox(height: 20),
-              const Text(
-                "Welcome to Tracker",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              const Icon(
+                Icons.fitness_center,
+                size: 80,
+                color: Colors.blueAccent,
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
+
+              const Text(
+                "FitJournal",
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              ),
+              const Text(
+                "Masuk untuk melanjutkan",
+                style: TextStyle(color: Colors.grey),
+              ),
+              const SizedBox(height: 40),
+
               TextField(
                 controller: _nameController,
                 decoration: const InputDecoration(
@@ -36,30 +46,54 @@ class _LoginScreenState extends State<LoginScreen> {
                   prefixIcon: Icon(Icons.person),
                 ),
               ),
-              const SizedBox(height: 20),
-              SizedBox(
+              const SizedBox(height: 30),
+              Container(
                 width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (_nameController.text.isNotEmpty) {
-                      // 1. Proses Login
-                      await Provider.of<AuthProvider>(
-                        context,
-                        listen: false,
-                      ).login(_nameController.text);
+                height: 55,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF4A80F0), Color(0xFF9E47FF)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4A80F0).withOpacity(0.4),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      if (_nameController.text.isNotEmpty) {
+                        await Provider.of<AuthProvider>(
+                          context,
+                          listen: false,
+                        ).login(_nameController.text);
 
-                      // 2. TAMBAHAN PENTING: Cek apakah layar masih aktif
-                      if (!mounted) return;
-
-                      // 3. Pindah layar
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const MainScreen()),
-                      );
-                    }
-                  },
-                  child: const Text("MASUK"),
+                        if (!mounted) return;
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const MainScreen()),
+                        );
+                      }
+                    },
+                    child: const Center(
+                      child: Text(
+                        "MASUK",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],

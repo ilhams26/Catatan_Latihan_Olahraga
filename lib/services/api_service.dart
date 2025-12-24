@@ -3,14 +3,13 @@ import '../models/exercise.dart';
 import '../models/user_model.dart';
 
 class ApiService {
-  // Pastikan URL MockAPI kamu benar (tanpa '/workouts' di ujungnya)
+  // URL MockAPI
   final String baseUrl = 'https://6948320d1ee66d04a44eed4d.mockapi.io/api/v1';
   final Dio _dio = Dio();
 
-  // 1. GET Workouts SPESIFIK USER (Agar data tidak campur)
+  // 1. GET SPESIFIK USER
   Future<List<Exercise>> getExercisesByUser(String userId) async {
     try {
-      // MockAPI support filter: /workouts?userId=123
       final response = await _dio.get('$baseUrl/workouts?userId=$userId');
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
@@ -82,7 +81,7 @@ class ApiService {
     }
   }
 
-  // 2. Buat user baru (Register otomatis)
+  // 2. Buat user (Register otomatis)
   Future<UserModel?> createUser(String username) async {
     try {
       final newUser = UserModel(

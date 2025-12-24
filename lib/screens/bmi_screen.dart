@@ -28,7 +28,6 @@ class _BmiScreenState extends State<BmiScreen> {
 
   void _calculateBMI() {
     setState(() {
-      // Rumus BMI = Berat (kg) / (Tinggi (m) * Tinggi (m))
       double heightInMeter = _height / 100;
       _bmi = _weight / (heightInMeter * heightInMeter);
     });
@@ -118,8 +117,6 @@ class _BmiScreenState extends State<BmiScreen> {
             ),
 
             const SizedBox(height: 20),
-
-            // INPUT TINGGI
             const Text("Tinggi Badan (cm)"),
             Slider(
               value: _height,
