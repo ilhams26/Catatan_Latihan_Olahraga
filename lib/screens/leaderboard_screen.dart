@@ -191,7 +191,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               child: Container(
                 padding: const EdgeInsets.all(3),
                 decoration: const BoxDecoration(
-                  color: Colors.white, // Border avatar putih
+                  color: Colors.blue,
                   shape: BoxShape.circle,
                 ),
                 child: CircleAvatar(
