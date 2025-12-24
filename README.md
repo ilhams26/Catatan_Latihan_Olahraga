@@ -12,7 +12,7 @@ Berikut adalah daftar anggota kelompok yang berkontribusi dalam proyek ini:
 
 | Nama                 | Peran                          | GitHub                                                               | WhatsApp           |
 | :------------------- | :----------------------------- | :------------------------------------------------------------------- | :----------------- |
-| **M. Ilham Ghazali** | Ketua Tim / UI & Backend Logic | [GitHub Ilham Ghazali](https://github.com/USERNAME_ILHAM)            | **0812-6539-8468** |
+| **M. Ilham Ghazali** | Ketua Tim / UI & Backend Logic | [GitHub ilhams26](https://github.com/ilhams26)                       | **0812-6539-8468** |
 | **Tsabita Parisya**  | Tester & Documentation         | [GitHub tsaabitaparisya-art](https://github.com/tsaabitaparisya-art) | -                  |
 | **Ai Siti**          | Tester & Documentation         | [GitHub aisitinp](https://github.com/aisitinp)                       | -                  |
 
@@ -47,7 +47,7 @@ Pastikan Anda telah menginstal **Flutter SDK** dan **Git** di komputer Anda.
     Buka terminal dan jalankan perintah berikut:
 
     ```bash
-    git clone [https://github.com/USERNAME_GITHUB/NAMA_REPO.git](https://github.com/USERNAME_GITHUB/NAMA_REPO.git)
+    git clone [https://github.com/ilhams26/NAMA_REPO.git](https://github.com/ilhams26/Catatan_Latihan_Olahraga.git)
     cd catatan_olahraga
     ```
 
