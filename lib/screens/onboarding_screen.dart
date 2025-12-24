@@ -46,7 +46,6 @@ class OnboardingScreen extends StatelessWidget {
 
                   const Spacer(),
 
-                  // Tombol Gradient "Masuk"
                   Container(
                     width: double.infinity,
                     height: 55,
